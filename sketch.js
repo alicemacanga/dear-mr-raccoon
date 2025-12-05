@@ -1,57 +1,95 @@
-// MESSAGE TO READER OF CODE:
-// doesn't the plushie's nose look extra boop-able?
+/* -------------------------------------------------------------------------- */
+/*                                  VARIABLES                                 */
+/* -------------------------------------------------------------------------- */
 
 
-// positional var
+
+/* -------------------------- positional variables -------------------------- */
 let w; // width of screen
 let h; // height of screen
 let mX; //mouse X position
 let mY; //mouse Y position
 
-// game Logic
-let gameState = 0;    // sets game state
-let endState = false; // defines if game has ended
+/* ------------------------------- game logic variables ------------------------------- */
 
-// Point n' Click
-
-  // interactive variables
-  let day = 1;        // counts days
-  let badEnd = false; // determines if ending is bad
-  let badEndRoll; // rolls for bad end after day 20
-  let netEnd = false; // determines if ending is neutral
-  let netEndAnimation = 0; // used to animate diary glow
-  let pageHint = 0;   // will be used to make a hint to turn page, currently not implemented
-  let hintOpCheck = false;  // same as above
+  let gameState = 3;    // sets game state
+  let endState = false; // defines if game has ended
 
   let coolDown = 0; // used to prevent spam-clicking
 
-  // VFX
+/* ----------------------------- Point n' Click variables----------------------------- */
+
+// general
+  let day = 1;        // counts days
+
+// endings
+
+  // bad ending
+    let badEndRoll; // rolls for bad end after day 20
+    let badEnd = false; // determines if ending is bad
+
+  // neutral ending
+    let netEnd = false; // determines if ending is neutral
+
+// animations
+
   let boardAnimation; // used to animate board sliding out in the begginning
 
-  // raccoon display variable
+  let netEndAnimation = 0; // used to animate diary glow
+
+  let pageHint = 0;   // will be used to make a hint to turn page, currently not implemented
+  let hintOpCheck = false;  // same as above
+
+// raccoon visuals
+
   let raccoonIndex;   // used to display raccoon images
 
-  // images
+/* ------------------------ Choose Your Own variables ----------------------- */
+
+  let color = 0;
+  let word;
+
+/* -------------------------------------------------------------------------- */
+/*                                   PRELOAD                                  */
+/* -------------------------------------------------------------------------- */
+
+/* --------------------------------- v1 assets --------------------------------- */
+
   let imageAsset = [];  // general image variable
   let letter = [];      // contains letter images
   let letterHeader = [];// contains letter header images
   let headerIndex = 0;  // used to select headers
 
+/* -------------------------------- v2 asets -------------------------------- */
+
+  let npStill = [];
+  let npFlip = [];
+
 function preload() {
   for (let i = 0; i < 18; i++) {
-    imageAsset[i] = loadImage("assets/imageAsset_" + i + ".png");
+    imageAsset[i] = loadImage("assets/v1/imageAsset_" + i + ".png");
   }
   for (let i = 0; i < 31; i++) {
-    letter[i] = loadImage("assets/letter_" + i + ".png");
+    letter[i] = loadImage("assets/v1/letter_" + i + ".png");
   }
   for (let i = 0; i < 6; i++) {
-    letterHeader[i] = loadImage("assets/letterHeader_" + i + ".png");
+    letterHeader[i] = loadImage("assets/v1/letterHeader_" + i + ".png");
+  }
+  for (let i = 0; i< 24; i++) { // load notePad flip animation
+    npFlip[i] = loadImage('assets/v2/nb-flip/nb-flip_' + i + '.png')
+  }
+  for (let i = 0; i< 6; i++) { // load notePad still animation
+    npStill[i] = loadImage('assets/v2/nb-still/nb-still_' + i + '.png')
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                    SETUP                                   */
+/* -------------------------------------------------------------------------- */
+
 function setup() {
 // canvas
-  canvas = createCanvas(windowWidth*0.625, (windowWidth*0.8)*0.625); // dynamically sets canvas size based on window size
+  canvas = createCanvas(windowWidth*0.6875, windowWidth*0.55); // dynamically sets canvas size based on window size
   canvas.parent("holder-canvas");
 
   frameRate(60);
@@ -66,7 +104,7 @@ function setup() {
   imageMode(CENTER);
   angleMode(DEGREES);
 
-// buttons
+/* // buttons
     //quit to main menu
   let button01 = createButton('Quit');
   button01.parent('holder-button01');
@@ -74,17 +112,21 @@ function setup() {
     //save progress and quit to main menu
   let button02 = createButton('Save & Quit');
   button02.parent('holder-button02');
-  button02.mousePressed(saveQuit);
+  button02.mousePressed(saveQuit); */
 
   console.log('day', day); // displays current day in console
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                    DRAW                                    */
+/* -------------------------------------------------------------------------- */
+
 function draw() {
-// Meta Functions
+/* ------------------------------- META LOGIC ------------------------------- */
+
   adjustCanvas()      // adjusts canvas size live based on window
   background(213,188,176); 
   gameMechanics();    // contains general game mechanics
-
 
   // positional var define
     w = width;
@@ -92,21 +134,36 @@ function draw() {
     mX = mouseX;
     mY = mouseY;
 
-// Game State Changes
+/* ------------------------------- GAME STATES ------------------------------ */
 
-  if(gameState === 0){              // "Menu" Mode
+  if(gameState === 0){   
+               // "Menu" Mode
     menu();
+
   } else if(gameState === 1){       // "Point n' Click Adventure" Mode
+
     pointAndClick();
     endScreens();                   // displays end screens
+
   } else if(gameState === 3){       // "Credits" Mode
-    credits();
+    choices();
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                  FUNCTIONS                                 */
+/* -------------------------------------------------------------------------- */
+
 function mousePressed() {
 
-// "Menu" Mode
+/* ---------------------------- Choice Clickables --------------------------- */
+
+ if(gameState === 3){
+    color++
+  }
+
+/* -------------------------- Title Clickables -------------------------- */
+
 if(gameState === 0){
   if(mX > w*0.4 && mX < w*0.6 && mY > h*0.565 && mY < h*0.635){ // start button function
     gameState = 1;
@@ -116,7 +173,7 @@ if(gameState === 0){
   }
 }
 
-// "Point n' Click Adventure" Mode
+/* ------------------ "Point n' Click Adventure" Clickables ----------------- */
 
 if(gameState === 1){
 
@@ -264,8 +321,7 @@ function raccoon() {  // contains raccoon images
   pop();
 }
 
-// Display Diary Asset
-function diary() {
+function diary() { // Display Diary Asset
 
 // display appropriate header on appropriate day
   if(day < 20) {
@@ -302,7 +358,9 @@ function diary() {
 }
 
 
-// Meta Functions
+/* -------------------------------------------------------------------------- */
+/*                               META FUNCTIONS                               */
+/* -------------------------------------------------------------------------- */
 
 function quit() { // quits game without saving
   gameState = 0;
@@ -319,5 +377,5 @@ function saveQuit() { // saves progress, returns to menu
 }
 
 function adjustCanvas() { // dynamically adjusts canvas size based on window size
-  resizeCanvas(windowWidth*0.625, (windowWidth*0.8)*0.625);
+  resizeCanvas(windowWidth*0.6875, windowWidth*0.55);
 }

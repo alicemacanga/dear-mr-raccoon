@@ -1,13 +1,13 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: rgb(98, 75, 97);
+  background-color: rgb(40, 32, 40);
 }
 
 canvas {
   display: block;
   margin: auto;
-  border-radius: 25px;
+  border-radius: 15px;
 }
 
 button {
@@ -34,6 +34,6 @@ div.quit {
 }
 
 div.spacer {
-  margin-bottom: 2%;
+  margin-bottom: 1%;
 }
 
