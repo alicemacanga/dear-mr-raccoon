@@ -89,16 +89,40 @@ function preload() {
 
 function setup() {
 // canvas
+
   canvas = createCanvas(windowWidth*0.6875, windowWidth*0.55); // dynamically sets canvas size based on window size
   canvas.parent("holder-canvas");
 
   frameRate(60);
 
 // var define
+
   w = width;
   h = height;
 
-  raccoonIndex = 4;
+/* ----------------------------- Point n' Click ----------------------------- */
+
+    raccoonIndex = 4;
+
+/* --------------------------------- Choice --------------------------------- */
+
+  // cursor related
+
+    anchX = w*0.5;
+    anchY = h*0.85;
+
+    cmovX = anchX;
+    cmovY = anchY;
+    cX = anchX;
+    cY = anchY;
+
+    cursRadius = int(dist(anchX,anchY,w*0.85,h*0.975));
+    chCursor = new choiceCursor(anchX,anchY);
+
+  // animated prompt related
+
+    startTimer();
+    pStored = pNext;
 
 // settings
   imageMode(CENTER);
@@ -146,7 +170,7 @@ function draw() {
     endScreens();                   // displays end screens
 
   } else if(gameState === 3){       // "Credits" Mode
-    choices();
+    chooseyourown();
   }
 }
 
@@ -158,8 +182,9 @@ function mousePressed() {
 
 /* ---------------------------- Choice Clickables --------------------------- */
 
- if(gameState === 3){
-    color++
+  // if the user interacts with the game at any point, hide cursor.
+  if(gameState === 3){
+    requestPointerLock();
   }
 
 /* -------------------------- Title Clickables -------------------------- */
@@ -173,7 +198,7 @@ if(gameState === 0){
   }
 }
 
-/* ------------------ "Point n' Click Adventure" Clickables ----------------- */
+/* ------------------ "Point n' Click" Clickables ----------------- */
 
 if(gameState === 1){
 
