@@ -31,12 +31,12 @@
 
 /* ----------------------------- Animated Prompt ---------------------------- */
 
-  let pNext = ''; // prompt queued to be next
+  let pScene = ''; // scene prompt, queued to be next
   let pStored = '';  // displayable prompt
   let pCurrent = '';  // text currently on screen
 
   let typePos = 0;
-  let typeSpd = 0.01;
+  let typeSpd = 1;
 
   let typeStart;
   let typeFrame;
@@ -47,6 +47,7 @@
   
   let choosing;
   let choiceMade;
+  let choiceText = [];
 
   let scenario = "road";
 
@@ -67,11 +68,11 @@ function chooseyourown() {
 
   choicePrompt(
       w*0.35,
-      h*0.2,
+      h*0.18,
       w*0.3,
-      h*0.4,
+      h*0.5,
       w*0.018,
-      255
+      w*0.028,
     );
 
   choices();
@@ -87,30 +88,13 @@ function choiceTree() {
   switch (scenario){
     case "road":
 
-      pNext = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean a euismod lorem. Mauris ut odio blandit, rutrum metus quis, tempus odio. Quisque sit amet justo in nisl dictum imperdiet. Nulla tellus diam, congue non lobortis a, sollicitudin a quam. Maecenas luctus id sapien ac dignissim. Aenean fringilla massa at arcu malesuada, sed egestas velit imperdiet. Aliquam vel ullamcorper elit, a aliquam quam. Vivamus tincidunt mauris sed sapien efficitur gravida.';
-      
-      if(choiceMade === 1){
-        scenario = "forest"
-      } else if (choiceMade === 2){
-        scenario = "river"
-      }
-      break;
-    case "river":
-      
-      pNext = 'henlo, you are now in the river.';
+      pScene = 'I finally stopped. Without a second thought, I slammed my breaks and pulled over next to the road. My heart was still pounding as my tires screeched to a stop. I have no idea what took over me in that moment, yet, I did make a choice. \n I took a deep breath before getting out of my car, and there you were, right in front of me. \n \nAm I really doing this?';
+      choiceText[1] = "Pick Him Up"
+      choiceText[2] = "This is CRAZY"
+
 
       if(choiceMade === 1){
-        scenario = "road"
-      } else if (choiceMade === 2){
         scenario = "forest"
-      }
-      break;
-    case "forest":
-      
-      pNext = 'ohmygodhellohiiii';
-
-      if(choiceMade === 1){
-        scenario = "road"
       } else if (choiceMade === 2){
         scenario = "river"
       }
@@ -120,13 +104,13 @@ function choiceTree() {
 
 /* -------------------------- Animated Prompt Logic ------------------------- */
 
-function choicePrompt(x,y,w,h,ts,f) {
+function choicePrompt(x,y,w,h,ts,tl,) {
 
   // hide text while notepad is flipped
   if(doFlip && textFlip >= 17){
     typePos = 0;
   } else if (!doFlip){
-    pStored = pNext;
+    pStored = pScene;
   }
 
 // display letter based on Type Cursor's position  
@@ -134,8 +118,11 @@ function choicePrompt(x,y,w,h,ts,f) {
 
 // text being displayed 
   push();
-    fill(f);
+    fill(157,139,255); //129,106,255
     textSize(ts)
+    textLeading(tl)
+    textFont(pFont);
+
     text(pCurrent,x,y,w,h);
   pop();
 
@@ -219,25 +206,33 @@ function choices() {
 
   // choice field 01
   push()
-    fill(0);
-    stroke(255)
+    fill(0,0);
+    stroke(157,139,255)
     if(choiceField(w*0.2,h*0.85,w*0.26,w*0.08)){
-      fill(200);
+      fill(147,59,255,140);
       if(choosing >= 360){
         choiceMade = 1;
         resetScene();
       }
     }
     rectMode(CENTER)
+    
     rect(w*0.2,h*0.85,w*0.26,w*0.08,200);
+
+    textAlign(CENTER, CENTER);
+    noStroke();
+    fill(157,139,255);
+    textSize(w*0.015);
+
+    text(choiceText[1],w*0.2,h*0.85,w*0.21,w*0.08)
   pop()
 
   // choice field 02
   push()
-    fill(0);
-    stroke(255)
+    fill(0,0);
+    stroke(157,139,255)
     if(choiceField(w*0.8,h*0.85,w*0.26,w*0.08)){
-      fill(200);
+      fill(147,59,255,140);
       if(choosing >= 360){
         choiceMade = 2;
         resetScene();
@@ -245,6 +240,13 @@ function choices() {
     }
     rectMode(CENTER);
     rect(w*0.8,h*0.85,w*0.26,w*0.08,200);
+
+    textAlign(CENTER, CENTER);
+    noStroke();
+    fill(157,139,255);
+    textSize(w*0.015);
+
+    text(choiceText[2],w*0.8,h*0.85,w*0.21,w*0.08)
   pop()
 }
 

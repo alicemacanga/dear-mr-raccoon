@@ -65,6 +65,8 @@ let mY; //mouse Y position
   let npStill = [];
   let npFlip = [];
 
+  let pFont;
+
 function preload() {
   for (let i = 0; i < 18; i++) {
     imageAsset[i] = loadImage("assets/v1/imageAsset_" + i + ".png");
@@ -81,6 +83,7 @@ function preload() {
   for (let i = 0; i< 6; i++) { // load notePad still animation
     npStill[i] = loadImage('assets/v2/nb-still/nb-still_' + i + '.png')
   }
+  pFont = loadFont('assets/v2/fonts/PlaypenSans-Medium.ttf');
 }
 
 /* -------------------------------------------------------------------------- */
@@ -122,7 +125,7 @@ function setup() {
   // animated prompt related
 
     startTimer();
-    pStored = pNext;
+    pStored = pScene;
 
 // settings
   imageMode(CENTER);
