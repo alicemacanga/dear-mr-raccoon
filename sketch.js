@@ -12,10 +12,12 @@ let mY; //mouse Y position
 
 /* ------------------------------- game logic variables ------------------------------- */
 
-  let gameState = 3;    // sets game state
+  let gameState = 0;    // sets game state
   let endState = false; // defines if game has ended
 
   let coolDown = 0; // used to prevent spam-clicking
+
+  let paused = false;
 
 /* ----------------------------- Point n' Click variables----------------------------- */
 
@@ -62,10 +64,12 @@ let mY; //mouse Y position
 
 /* -------------------------------- v2 asets -------------------------------- */
 
-  let npStill = [];
-  let npFlip = [];
+  let npStill = []; // still notepad animation
+  let npFlip = [];  // flipping notepad animation
 
-  let pFont;
+  let pFont;  // font used in animated prompt
+
+  let farewellImg; // holds image used for the good ending
 
 function preload() {
   for (let i = 0; i < 18; i++) {
@@ -84,6 +88,7 @@ function preload() {
     npStill[i] = loadImage('assets/v2/nb-still/nb-still_' + i + '.png')
   }
   pFont = loadFont('assets/v2/fonts/PlaypenSans-Medium.ttf');
+  farewellImg = loadImage('assets/v2/end.png')
 }
 
 /* -------------------------------------------------------------------------- */
@@ -112,14 +117,14 @@ function setup() {
   // cursor related
 
     anchX = w*0.5;
-    anchY = h*0.85;
+    anchY = h*0.95;
 
     cmovX = anchX;
     cmovY = anchY;
     cX = anchX;
     cY = anchY;
 
-    cursRadius = int(dist(anchX,anchY,w*0.85,h*0.975));
+    cursRadius = int(dist(anchX,anchY,(anchX+w*0.35),(anchY+h*0.125)));
     chCursor = new choiceCursor(anchX,anchY);
 
   // animated prompt related
@@ -131,17 +136,7 @@ function setup() {
   imageMode(CENTER);
   angleMode(DEGREES);
 
-/* // buttons
-    //quit to main menu
-  let button01 = createButton('Quit');
-  button01.parent('holder-button01');
-  button01.mousePressed(quit);
-    //save progress and quit to main menu
-  let button02 = createButton('Save & Quit');
-  button02.parent('holder-button02');
-  button02.mousePressed(saveQuit); */
-
-  console.log('day', day); // displays current day in console
+  window.alert("Disclaimer: This experience discusses animal harm and contains images of gore."); // alerts user of potential gore
 }
 
 /* -------------------------------------------------------------------------- */
@@ -152,7 +147,7 @@ function draw() {
 /* ------------------------------- META LOGIC ------------------------------- */
 
   adjustCanvas()      // adjusts canvas size live based on window
-  background(213,188,176); 
+  background(213,188,176,0); 
   gameMechanics();    // contains general game mechanics
 
   // positional var define
@@ -170,10 +165,20 @@ function draw() {
   } else if(gameState === 1){       // "Point n' Click Adventure" Mode
 
     pointAndClick();
+    pauseButton();
     endScreens();                   // displays end screens
 
   } else if(gameState === 3){       // "Credits" Mode
+
     chooseyourown();
+    
+  } else if(gameState === 4){
+    credits();
+    pauseButton();
+  }
+
+  if(paused){
+    pauseMenu();
   }
 }
 
@@ -197,7 +202,7 @@ if(gameState === 0){
     gameState = 1;
   }
   if(mX > w*0.4 && mX < w*0.6 && mY > h*0.705 && mY < h*0.775){ // credits button function
-    gameState = 3;
+    gameState = 4;
   }
 }
 
@@ -225,28 +230,28 @@ if(gameState === 1){
 // flipping diary progresses days
     if(mX > w*0.87 && mX < w*0.99 && mY > h*0.5 && mY < h*0.64 && (frameCount - coolDown) > 10){
       day = day +1;
-      console.log('pageUp', day);
+      //console.log('pageUp', day);
       coolDown = frameCount;  // anti-spam mechanic
     }
 
 // display appropriate raccoon image on appropriate day
     if(day <= 3){
-        console.log('01');
+        //console.log('01');
         raccoonIndex = 4
       } else if(day > 3 && day < 8){
-        console.log('02.1');
+        //console.log('02.1');
         raccoonIndex = 5
       } else if(day > 7 && day < 11){
-        console.log('02.2')
+        //console.log('02.2')
         raccoonIndex = 11;
       } else if(day > 10 && day < 21){
-        console.log('03');
+        //console.log('03');
         raccoonIndex = 6
       } else if(day > 20 && day < 30){
-        console.log('04');
+        //console.log('04');
         raccoonIndex = 7
       } else if(day === 30){
-        console.log('05');
+        //console.log('05');
         raccoonIndex = 8
       } else if(day > 30){
         netEnd = true;
@@ -254,8 +259,43 @@ if(gameState === 1){
         day = 30;
       }
   }
+
+  if(mX > w*0.2 && mY > h*0.88 && mX < w*0.4 && mY < h){
+    gameState = 3;
+  }
+
+  /* ------------------------------- Pause Menu ------------------------------- */
+  if(gameState > 0){
+    if(menuButton(w*0.03,h*0.03,w*0.07,w*0.07)){ // corner pause button
+      paused = true;
+    }
+    if(paused){
+      if(menuButton(w*0.5,h*0.45,w*0.21,h*0.1)){ // Resume
+        paused = false;
+      }
+      if(menuButton(w*0.5,h*0.58,w*0.21,h*0.1)){ // Save & Quit
+        saveQuit();
+      }
+      if(menuButton(w*0.5,h*0.71,w*0.21,h*0.1)){ // Save & Quit
+        quit();
+      }
+    }
+  }
 }
   
+}
+
+function keyPressed() {
+
+  /* ------------------------- name carving mechanics ------------------------- */
+
+  if(keyCode === BACKSPACE){
+      nameInput = nameInput.slice(0,-1);
+    } else if(keyCode === ENTER){
+      nameGuess();
+    } else {
+      nameInput = nameInput + key;
+    }
 }
 
 function gameMechanics() {
@@ -277,6 +317,7 @@ function endScreens() { // display appropreate end screen
 
 function menu(){ // contains menu items
   boardAnimation = w*1;
+  paused = false;
 
   push();
     textAlign(CENTER, CENTER);
@@ -285,18 +326,23 @@ function menu(){ // contains menu items
     translate(w*0.5,h*0.5)
     push();
       textSize(w*0.07)
+      fill(235, 208, 214);
       text('Dear Mr.Raccoon', w*0,-h*0.2,w*0.6) // title
     pop();
     push();
       translate(w*0,h*0.1);
+      fill(235, 208, 214);
       rect(w*0,h*0,w*0.2,w*0.07,w*0.03) // Play button
       textSize(w*0.04)
+      fill(0)
       text('Play', w*0,h*0,w*0.5)
     pop();
     push();
       translate(w*0,h*0.24);
+      fill(235, 208, 214);
       rect(w*0,h*0,w*0.2,w*0.07,w*0.03) // credits button
       textSize(w*0.04)
+      fill(0)
       text('Credits', w*0,h*0,w*0.5)
     pop();
   pop();
@@ -355,7 +401,7 @@ function diary() { // Display Diary Asset
   if(day < 20) {
     headerIndex = 0;
   } else if(day === 20){
-    console.log(20)
+    //console.log(20)
     headerIndex = 1;
   } else if(day === 21){
     headerIndex = 5;
@@ -406,4 +452,84 @@ function saveQuit() { // saves progress, returns to menu
 
 function adjustCanvas() { // dynamically adjusts canvas size based on window size
   resizeCanvas(windowWidth*0.6875, windowWidth*0.55);
+}
+
+function pauseButton() {
+  push()
+  noFill();
+  stroke(170);
+  strokeWeight(w*0.005)
+  rect(w*0.01,h*0.01,w*0.05,w*0.05,15)
+  line(w*0.027,h*0.025,w*0.027,w*0.045)
+  line(w*0.042,h*0.025,w*0.042,w*0.045)
+  pop()
+}
+
+function pauseMenu() {
+  push()
+
+    rectMode(CENTER);
+    textAlign(CENTER,CENTER)
+
+  //backdrop
+    fill(94, 67, 87);
+    rect(w*0.5,h*0.5,w*0.6,h*0.6,15)
+
+  //title
+    fill(235, 208, 214);
+    textSize(w*0.07)
+    text("PAUSED",w*0.5,h*0.27)
+
+  // Resume Bytton
+    push()
+      translate(w*0.5,h*0.45);
+
+
+      fill(173,128,132);
+      rect(w*0,h*0,w*0.21,h*0.1,15);
+
+      fill(235, 208, 214);
+      textSize(w*0.03)
+      stroke(94, 67, 87)
+      strokeWeight(w*0.005)
+      text("Resume",w*0,h*0)
+
+    pop()
+  
+  // Save & Quit Bytton 
+    push()
+      translate(w*0.5,h*0.58);
+
+
+      fill(173,128,132);
+      rect(w*0,h*0,w*0.21,h*0.1,15);
+
+      fill(235, 208, 214);
+      textSize(w*0.03)
+      stroke(94, 67, 87)
+      strokeWeight(w*0.005)
+      text("Save & Quit",w*0,h*0)
+
+    pop()
+
+  // Quit Bytton
+    push()
+      translate(w*0.5,h*0.71);
+
+
+      fill(173,128,132);
+      rect(w*0,h*0,w*0.21,h*0.1,15);
+
+      fill(235, 208, 214);
+      textSize(w*0.03)
+      stroke(94, 67, 87)
+      strokeWeight(w*0.005)
+      text("Quit",w*0,h*0)
+
+    pop()
+  pop()
+}
+
+function menuButton(x,y,w,h) {
+  return mX > x-((w)/2) && mX < x+((w)/2) && mY < y+((h)/2) && mY > y-((h)/2)
 }
