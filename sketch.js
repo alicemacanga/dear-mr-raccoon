@@ -18,6 +18,7 @@ let mY; //mouse Y position
   let coolDown = 0; // used to prevent spam-clicking
 
   let paused = false;
+  let showPointer = true;
 
 /* ----------------------------- Point n' Click variables----------------------------- */
 
@@ -107,6 +108,8 @@ function setup() {
 
   w = width;
   h = height;
+  mX = mouseX;
+  mY = mouseY;
 
 /* ----------------------------- Point n' Click ----------------------------- */
 
@@ -119,8 +122,6 @@ function setup() {
     anchX = w*0.5;
     anchY = h*0.95;
 
-    cmovX = anchX;
-    cmovY = anchY;
     cX = anchX;
     cY = anchY;
 
@@ -153,33 +154,44 @@ function draw() {
   // positional var define
     w = width;
     h = height;
-    mX = mouseX;
-    mY = mouseY;
+    mX += movedX
+    mY += movedY;
 
 /* ------------------------------- GAME STATES ------------------------------ */
 
   if(gameState === 0){   
                // "Menu" Mode
     menu();
+    showPointer = true;
 
   } else if(gameState === 1){       // "Point n' Click Adventure" Mode
 
     pointAndClick();
+    showPointer = true;
     endScreens();                   // displays end screens
-    pauseButton();
 
   } else if(gameState === 3){       // "Credits" Mode
 
     chooseyourown();
+    showPointer = false;
     
   } else if(gameState === 4){
     credits();
-    pauseButton();
+    showPointer = false;
   }
 
+/* ------------------------------- Pause Menu ------------------------------- */
+
   if(paused){
+    showPointer = false;
     pauseMenu();
   }
+
+/* --------------------------------- cursor --------------------------------- */
+  if(showPointer){
+    pointCursor();
+  }
+  
 }
 
 /* -------------------------------------------------------------------------- */
@@ -190,11 +202,26 @@ function mousePressed() {
 
 /* ---------------------------- Choice Clickables --------------------------- */
 
-  // if the user interacts with the game at any point, hide cursor.
-  if(gameState === 3){
+  // if the user interacts with the game at any point besides menu state, lock cursor.
+
+  if(!paused){
     requestPointerLock();
   }
 
+  /* if(paused && gameState === 3){
+    if(menuButton(w*0.5,h*0.45,w*0.21,h*0.1)){ // Resume
+      paused = false;
+      mX = mouseX;
+      mY = mouseY;
+      requestPointerLock();
+    }
+    if(menuButton(w*0.5,h*0.58,w*0.21,h*0.1)){ // Save & Quit
+
+    }
+    if(menuButton(w*0.5,h*0.71,w*0.21,h*0.1)){ // Quit
+    }
+  } */
+  
 /* -------------------------- Title Clickables -------------------------- */
 
 if(gameState === 0){
@@ -258,31 +285,38 @@ if(gameState === 1){
         endState = true;
         day = 30;
       }
-  }
+    }
 
-  if(mX > w*0.2 && mY > h*0.88 && mX < w*0.4 && mY < h){
-    gameState = 3;
+    if(mX > w*0.2 && mY > h*0.88 && mX < w*0.4 && mY < h){
+      gameState = 3;
+    }
   }
-
-  /* ------------------------------- Pause Menu ------------------------------- */
+/* ------------------------------- Pause Menu ------------------------------- */
   if(gameState > 0){
     if(menuButton(w*0.03,h*0.03,w*0.07,w*0.07)){ // corner pause button
       paused = true;
     }
-    if(paused){
-      if(menuButton(w*0.5,h*0.45,w*0.21,h*0.1)){ // Resume
-        paused = false;
-      }
-      if(menuButton(w*0.5,h*0.58,w*0.21,h*0.1)){ // Save & Quit
-        saveQuit();
-      }
-      if(menuButton(w*0.5,h*0.71,w*0.21,h*0.1)){ // Save & Quit
-        quit();
-      }
+  }
+  if(paused){
+    if(menuButton(w*0.5,h*0.45,w*0.21,h*0.1)){ // Resume
+      paused = false;
+      mX = mouseX;
+      mY = mouseY;
+      requestPointerLock();
+    }
+    if(menuButton(w*0.5,h*0.58,w*0.21,h*0.1)){ // Save & Quit
+      saveQuit();
+      mX = mouseX;
+      mY = mouseY;
+      requestPointerLock();
+    }
+    if(menuButton(w*0.5,h*0.71,w*0.21,h*0.1)){ // Quit
+      quit();
+      mX = mouseX;
+      mY = mouseY;
+      requestPointerLock();
     }
   }
-}
-  
 }
 
 function keyPressed() {
@@ -296,6 +330,17 @@ function keyPressed() {
     } else {
       nameInput = nameInput + key;
     }
+
+  /* ------------------------------- pause menu ------------------------------- */
+  if(gameState > 0){
+    if(!paused &&keyCode === 192){
+      paused = true;
+      exitPointerLock();
+    } else if (paused &&keyCode === 192){
+      paused = false;
+      requestPointerLock();
+    }
+  }
 }
 
 function gameMechanics() {
@@ -344,6 +389,14 @@ function menu(){ // contains menu items
       textSize(w*0.04)
       fill(0)
       text('Credits', w*0,h*0,w*0.5)
+    pop();
+    push();
+      translate(w*0,h*0.43);
+      textSize(w*0.02)
+      fill(235, 208, 214);
+      text('Tip:', w*0,-h*0.05,w*1) // title
+      text('Use the Note Pad\'s corner to progress days', w*0,h*0,w*1) // title
+      text('Use the \" ` \" key to open pause menu', w*0,h*0.03,w*1) // title
     pop();
   pop();
 }
@@ -444,6 +497,10 @@ function quit() { // quits game without saving
   netEnd = false;
   netEndAnimation = 0;
   endState = false;
+
+  scenario= "road"
+  chestnuts = false;
+  rascal = false;
 }
 
 function saveQuit() { // saves progress, returns to menu
@@ -531,5 +588,12 @@ function pauseMenu() {
 }
 
 function menuButton(x,y,w,h) {
-  return mX > x-((w)/2) && mX < x+((w)/2) && mY < y+((h)/2) && mY > y-((h)/2)
+  return mouseX > x-((w)/2) && mouseX < x+((w)/2) && mouseY < y+((h)/2) && mouseY > y-((h)/2)
+}
+
+function pointCursor() {
+  push()
+  noStroke();
+  ellipse(mX,mY,w*0.01,w*0.01);
+  pop()
 }

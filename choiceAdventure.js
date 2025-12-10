@@ -12,8 +12,6 @@
 
 /* --------------------------------- Choice Cursor --------------------------------- */
   
-  let cmovX;  // Technical Cursor X position (pre lerp)
-  let cmovY;  // Technical Cursor Y position (pre lerp)
   let cX; // Practical Cursor X position (post lerp)
   let cY; // Practical Cursor Y position  (post lerp)
 
@@ -102,7 +100,10 @@ function chooseyourown() {
     nameCarving();
   } else {
     choices();
-    chCursor.display();
+    if(!paused){
+      chCursor.display();
+    }
+    
     chCursor.shake();
   }
 
