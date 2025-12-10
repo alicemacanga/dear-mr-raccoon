@@ -165,8 +165,8 @@ function draw() {
   } else if(gameState === 1){       // "Point n' Click Adventure" Mode
 
     pointAndClick();
-    pauseButton();
     endScreens();                   // displays end screens
+    pauseButton();
 
   } else if(gameState === 3){       // "Credits" Mode
 
