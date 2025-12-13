@@ -2,6 +2,12 @@
 /*                                  Variables                                 */
 /* -------------------------------------------------------------------------- */
 
+/* ----------------------------- Sequence Intro ----------------------------- */
+
+  let intro = true; // determines if intro scene is active
+  let introTimer = 0; // determines how long intro scene has been displayed
+  let introOpacity = 255; // used to fade out the intro scene
+
 /* -------------------------------- animation ------------------------------- */
 
   let npFrStill = 0;  // Frame Counter for Still Notepad 
@@ -33,41 +39,39 @@
   let pStored = '';  // displayable prompt
   let pCurrent = '';  // text currently on screen
 
-  let typePos = 0;
-  let typeSpd = 0.05;
+  let typePos = 0; // position of the typing cursor -> number of letters displayed in order
+  let typeSpd = 0.05; // speed at which typing cursor moves
 
-  let typeStart;
-  let typeFrame;
-
-  let writePrompt = true;
+  let typeStart; // stores framecount value at which the last letter was typed
+  let typeFrame; // determines framecount value at which the next letter should be typed
 
 /* ------------------------------- Name Prompt ------------------------------ */
 
-  let carving = false; // tells the code whether to engage the "carving" screne
+  let carving = false; // tells code whether to engage the "carving" screne
 
   let nameInput = ""; // holds user's name guess
   let nameState = "clue"; // used to check if user guess is correct
 
-  let namePrompt = "What's his name?";
-  let nameOp = 255;
-  let fadePrompt = false;
+  let namePrompt = "What's his name?"; // stores text to be displayed during carving scene
+  let nameOp = 255; // stores opacity of the name prompt
+  let fadePrompt = false; // tells code to engage fading name prompt
 
-  let wrongCount = 0;
-  let wrongCooldown = false;
-  let wrongTimer = 0;
+  let wrongCount = 0; // counts how many times user guessed wrong
+  let wrongCooldown = false; // determines whether wrongTimer cooldown should be engaged
+  let wrongTimer = 0; // determines when "wrong prompt" switches to initial name prompt
   
 
 /* ----------------------------- gameplay logic ----------------------------- */
   
-  let choosing;
-  let choiceMade;
-  let choiceText = [];
-  let choiceType2 = false;
+  let choosing; // counts up when used hovers over choice field
+  let choiceMade; // holds value of user's choice
+  let choiceText = []; // stores text to be displayed in choice fields
+  let choiceType2 = false; // checks if there should be one or two choice fields
 
-  let scenario = "road";
+  let scenario = "intro"; // holds value for the currently active scenario
 
-  let chestnuts;
-  let rascal;
+  let chestnuts; // checks if user collected chestnuts
+  let rascal; // checks if user befriended Rascal
 
   let endingOp = 0; // used to fade-in the end screen
   let ending; // checks if the ending was achieved
@@ -83,6 +87,7 @@ function chooseyourown() {
   background(12,10,18);
 
   cursBehavior();
+
   choiceTree();
 
   notePad();
@@ -97,9 +102,13 @@ function chooseyourown() {
     );
 
   if(carving){
+
     nameCarving();
+
   } else {
+
     choices();
+
     if(!paused){
       chCursor.display();
     }
@@ -107,9 +116,13 @@ function chooseyourown() {
     chCursor.shake();
   }
 
+  if(intro){
+    choiceIntro();
+  }
+
   if(ending){
-      theend();
-    }
+    theend();
+  }
 }
 
 /* --------------------------- Name Carving Scene --------------------------- */
@@ -119,7 +132,7 @@ function nameCarving() {
 // erases previous scene
   background(12,10,18); 
 
-// prompt
+// display prompt
   push()
     textAlign(CENTER);
     fill(157,139,255,nameOp);
@@ -173,7 +186,7 @@ function nameCarving() {
 
   }
 
-  // switch name prompt to "clue" state
+  // switch name prompt to "clue" state after sufficient number of wrong guesses
   if(wrongCooldown){
     wrongTimer += 1;
     if(wrongTimer > 300){
@@ -187,16 +200,17 @@ function nameCarving() {
 }
 
 function nameGuess() { // checks if the input name is correct
-  if(nameInput == "charlie"){
+
+  if(nameInput == "charlie"){ // if true
     nameState = "true";
-  } else {
+  } else {                    // if false
     nameState = "false";
     wrongCount += 1;
     wrongTimer = 0;
     wrongCooldown = true;
   }
 
-  fadePrompt = true;
+  fadePrompt = true; // fade every time user guesses
 }
 
 /* -------------------------- Animated Prompt Logic ------------------------- */
@@ -215,7 +229,7 @@ function choicePrompt(x,y,w,h,ts,tl,) {
 
 // text being displayed 
   push();
-    fill(157,139,255); //129,106,255
+    fill(157,139,255);
     textSize(ts)
     textLeading(tl)
     textFont(pFont);
@@ -240,37 +254,38 @@ function choicePrompt(x,y,w,h,ts,tl,) {
 
 }
 
-function startTimer() {
+function startTimer() { // determines when the first letter should be typed
   typeStart = frameCount;
   typeFrame = typeStart + typeSpd;
 }
 
 /* ------------------------ Note Pad Animation Logic ------------------------ */
 
-function notePad() {
+function notePad() { // calculates which frame of notepad animation should be displayed
   
   if(doFlip){
     
     image(npFlip[npFrFlip],w*0.5,h*0.5,w,h)
 
-    if(frameCount % 2 === 0) {
+    if(frameCount % 2 === 0) { // converts game fps to "flip" animation fps (30fps)
       npFrFlip += 1;
     }
 
-    textFlip++
+    textFlip++ // counts "flip" animation duration
 
-    if(npFrFlip > ((npFlip.length)-1)){
+    if(npFrFlip > ((npFlip.length)-1)){ // resets "flip" animation
       doFlip = false;
       npFrFlip = 0;
       textFlip = 0;
     }
+
   } else {
 
-    if(frameCount % 8 === 0) {
+    if(frameCount % 8 === 0) { // converts game fps to "still" animation fps (30fps)
       npFrStill += 1;
     }
 
-    if(npFrStill > ((npStill.length)-1)){
+    if(npFrStill > ((npStill.length)-1)){ // loops "still" animation
       npFrStill = 0;
     }
 
@@ -280,23 +295,16 @@ function notePad() {
 
 /* --------------------------- Choice System Logic -------------------------- */
 
-function choiceField(x,y,w,h) {
+function choiceField(x,y,w,h) { // used to detect if the cursor is in the specified area
   return cX > x-((w)/2) && cX < x+((w)/2) && cY < y+((h)/2) && cY > y-((h)/2)
 }
 
 function choices() {
 
-  /* push()
-  noFill()
-  stroke(255)
-  rectMode(CENTER)
-  rect(w*0.5,h*0.85,w*0.7,h*0.25)
-  pop() */
-
-  if(choiceType2){
+  if(choiceType2){ // display 1 choice field
 
     // making a choice
-    if(choiceField(w*0.5,h*0.85,w*0.26,w*0.08)){
+    if(choiceField(w*0.5,h*0.85,w*0.26,w*0.08)){ // if cursor in choicefield
       choosing += 4;
     } else {
       choosing = 0;
@@ -307,7 +315,8 @@ function choices() {
     push()
       fill(0,0);
       stroke(157,139,255)
-      if(choiceField(w*0.5,h*0.85,w*0.26,w*0.08)){
+
+      if(choiceField(w*0.5,h*0.85,w*0.26,w*0.08)){ // if cursor in choicefield
         fill(147,59,255,140);
         if(choosing >= 360){
           choiceMade = 1;
@@ -315,19 +324,20 @@ function choices() {
         }
       }
       rectMode(CENTER);
-      rect(w*0.5,h*0.85,w*0.26,w*0.08,200);
+      rect(w*0.5,h*0.85,w*0.26,w*0.08,200); // choicefield visual
 
       textAlign(CENTER, CENTER);
       noStroke();
       fill(157,139,255);
       textSize(w*0.015);
 
-      text(choiceText[1],w*0.5,h*0.85,w*0.26,w*0.08)
+      text(choiceText[1],w*0.5,h*0.85,w*0.26,w*0.08) // choicefield text
     pop()
-  } else {
+
+  } else { // display 2 choice fields
 
     // making a choice
-    if(choiceField(w*0.8,h*0.85,w*0.26,w*0.08) || choiceField(w*0.2,h*0.85,w*0.26,w*0.08)){
+    if(choiceField(w*0.8,h*0.85,w*0.26,w*0.08) || choiceField(w*0.2,h*0.85,w*0.26,w*0.08)){ // if cursor in either choicefield
       choosing += 4;
     } else {
       choosing = 0;
@@ -338,7 +348,7 @@ function choices() {
     push()
       fill(0,0);
       stroke(157,139,255)
-      if(choiceField(w*0.2,h*0.85,w*0.26,w*0.08)){
+      if(choiceField(w*0.2,h*0.85,w*0.26,w*0.08)){ // if cursor in choicefield
         fill(147,59,255,140);
         if(choosing >= 360){
           choiceMade = 1;
@@ -347,21 +357,21 @@ function choices() {
       }
       rectMode(CENTER)
       
-      rect(w*0.2,h*0.85,w*0.26,w*0.08,200);
+      rect(w*0.2,h*0.85,w*0.26,w*0.08,200); // choicefield visual
 
       textAlign(CENTER, CENTER);
       noStroke();
       fill(157,139,255);
       textSize(w*0.015);
 
-      text(choiceText[1],w*0.2,h*0.85,w*0.21,w*0.08)
+      text(choiceText[1],w*0.2,h*0.85,w*0.21,w*0.08) // choicefield text
     pop()
 
     // choice field 02
     push()
       fill(0,0);
       stroke(157,139,255)
-      if(choiceField(w*0.8,h*0.85,w*0.26,w*0.08)){
+      if(choiceField(w*0.8,h*0.85,w*0.26,w*0.08)){ // if mouse in choicefield
         fill(147,59,255,140);
         if(choosing >= 360){
           choiceMade = 2;
@@ -369,14 +379,14 @@ function choices() {
         }
       }
       rectMode(CENTER);
-      rect(w*0.8,h*0.85,w*0.26,w*0.08,200);
+      rect(w*0.8,h*0.85,w*0.26,w*0.08,200); // choicefield visual
 
       textAlign(CENTER, CENTER);
       noStroke();
       fill(157,139,255);
       textSize(w*0.015);
 
-      text(choiceText[2],w*0.8,h*0.85,w*0.21,w*0.08)
+      text(choiceText[2],w*0.8,h*0.85,w*0.21,w*0.08) // choicefield text
     pop()
 
   }
@@ -386,30 +396,32 @@ function choices() {
 
 function cursBehavior() {
 
+// update anchor position based on windowsize
   anchX = w*0.5;
   anchY = h*0.95;
 
+// move cursor based on relative mouse movement
   cX += movedX;
   cY += movedY;
 
-  // Cursor's distance from anchor
+// calculate Cursor's distance from anchor
   cursDist = int(dist(anchX,anchY,cX,cY));
 
-  // Cursor Drag Calculation
+// calculate Cursor Drag ammount
   if(cursDist > cursRadius*0.7){
     cursDrag = 0.04;
   } else {
     cursDrag = map(cursDist,0,cursRadius*0.7,1,0.05);
   }
 
-  // Cursor Shake Ammount Calculation
+// calculate Cursor Shake Ammount 
   cShakeX = map(cursDist,0,cursRadius,0,w*0.01);
   cShakeY = map(cursDist,0,cursRadius,0,w*0.01);
 }
 
 /* -------------------------------- Page Flip ------------------------------- */
 
-function resetScene() {
+function resetScene() { // "wipe" scene visuals on page flip
   cX = anchX;
   cY = anchY;
   doFlip = true;
@@ -418,7 +430,7 @@ function resetScene() {
 /* ------------------------------- End Screen ------------------------------- */
 
 function theend() {
-  endingOp += 5.6;
+  endingOp += 5.6; // fade in end screen
 
   tint(255,endingOp)
   image(farewellImg,w*0.5,h*0.5,w,h)
@@ -427,13 +439,17 @@ function theend() {
 /* ------------------------------ Cursor Class ------------------------------ */
 
 class choiceCursor {
+
   constructor(posX,posY) {
+    
     this.posX = posX;
     this.posY = posY;
+
   }
+
   display() {
 
-    /* -------------------------- Sprite Movement Logic ------------------------- */
+    /* -------------------------- Cursor Movement Logic ------------------------- */
 
     if(cursDist <= cursRadius){                 // if within cursRadius, use cursDrag
       this.posX = lerp(this.posX,cX,cursDrag);
@@ -447,14 +463,18 @@ class choiceCursor {
 
 
 
-    ellipse(this.posX,this.posY,w*0.02);
-    push()
+    ellipse(this.posX,this.posY,w*0.02); // display cursor as an ellipse
+
+    push() // display "choosing" circle
       noFill();
       stroke(255);
       strokeWeight(w*0.005);
       arc(this.posX,this.posY,w*0.03,w*0.03,0,choosing);
     pop()
   }
+
+  /* ------------------------------ Cursor Shake ------------------------------ */
+  
   shake() {
     if(cursDist <= cursRadius){
       this.posX = this.posX+(random(-cShakeX,cShakeX));
@@ -463,12 +483,40 @@ class choiceCursor {
   }
 }
 
+/* ------------------------------- Intro Scene ------------------------------ */
+
+function choiceIntro() {
+  background(12,10,18,introOpacity);
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                 CHOICE TREE                                */
 /* -------------------------------------------------------------------------- */
 
 function choiceTree() {
   switch (scenario){
+    /* ---------------------------------- INTRO --------------------------------- */
+    case "intro":
+
+      pScene = 'Dear Mr.Raccoon...';
+      choiceText[1] = "I have to do something..."
+
+      intro = true;
+
+      playSound();
+
+      if(introTimer >= 500){ // after 10 seconds, fade into next scene
+        introTimer = 600;
+        scenario = "road";
+      } else {
+        introTimer += 1;
+      }
+
+      choiceType2 = false;
+      chestnuts = false;
+      rascal = false;
+
+      break;
 
     /* ---------------------------------- ROAD ---------------------------------- */
     case "road":
@@ -477,6 +525,9 @@ function choiceTree() {
       choiceText[1] = "Let's do this"
       choiceText[2] = "This is CRAZY"
 
+      if(introOpacity > 0){ // calculates opacity ammount for fade
+        introOpacity -= 5;
+      }
       choiceType2 = false;
       chestnuts = false;
       rascal = false;
