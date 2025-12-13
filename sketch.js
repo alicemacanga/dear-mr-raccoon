@@ -236,10 +236,10 @@ function mousePressed() {
 /* -------------------------- Title Clickables -------------------------- */
 
 if(gameState === 0){
-  if(mX > w*0.4 && mX < w*0.6 && mY > h*0.565 && mY < h*0.635){ // start button function
+  if(mX > w*0.4 && mX < w*0.6 && mY > h*0.515 && mY < h*0.585){ // start button function
     gameState = 1;
   }
-  if(mX > w*0.4 && mX < w*0.6 && mY > h*0.705 && mY < h*0.775){ // credits button function
+  if(mX > w*0.4 && mX < w*0.6 && mY > h*0.655 && mY < h*0.725){ // credits button function
     gameState = 3;
   }
 }
@@ -249,9 +249,7 @@ if(gameState === 0){
 if(gameState === 1){
 
 // Bad Ending 
-  if(day > 20 && day < 30 && netEnd === false){   // every click post day 20, 1 in 3 chance of bad ending
-    badEndRoll = int(random(1,3))
-  }
+  
 
 
   if(badEnd === true){
@@ -269,6 +267,10 @@ if(gameState === 1){
     if(mX > w*0.87 && mX < w*0.99 && mY > h*0.5 && mY < h*0.64 && (frameCount - coolDown) > 10){
       day = day +1;
       coolDown = frameCount;  // anti-spam mechanic
+
+      if(day > 20 && day < 30 && netEnd === false){   // every click post day 20, 1 in 3 chance of bad ending
+        badEndRoll = int(random(1,10))
+      }
     }
 
 // display appropriate raccoon image on appropriate day
