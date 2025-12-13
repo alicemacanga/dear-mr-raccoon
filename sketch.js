@@ -5,6 +5,7 @@
 
 
 /* -------------------------- positional variables -------------------------- */
+
 let w; // width of screen
 let h; // height of screen
 let mX; //mouse X position
@@ -46,6 +47,10 @@ let mY; //mouse Y position
 // raccoon visuals
 
   let raccoonIndex;   // used to display raccoon images
+
+/* -------------------------- screen shot variables ------------------------- */
+
+  let prepSS = true;
 
 /* -------------------------------------------------------------------------- */
 /*                                   PRELOAD                                  */
@@ -148,7 +153,7 @@ function setup() {
   imageMode(CENTER);
   angleMode(DEGREES);
 
-  window.alert("Disclaimer: This experience discusses animal harm and contains images of gore."); // alerts user of potential gore
+  // temp window.alert("Disclaimer: This experience discusses animal harm and contains images of gore."); // alerts user of potential gore
 }
 
 /* -------------------------------------------------------------------------- */
@@ -207,6 +212,10 @@ function draw() {
 /* ---------------------------------- music --------------------------------- */
 
   backgroundMusic();
+
+/* ------------------------------- save canvas ------------------------------ */
+
+  screenGrab();
   
 }
 
@@ -375,12 +384,12 @@ function menu(){ // contains main menu items
     push();
       textSize(w*0.07)
       fill(235, 208, 214);
-      text('Dear Mr.Raccoon', w*0,-h*0.2,w*0.6) 
+      text('Dear Mr.Raccoon', w*0,-h*0.25,w*0.6) 
     pop();
 
 // Play button
     push();
-      translate(w*0,h*0.1);
+      translate(w*0,h*0.05);
       fill(235, 208, 214);
       rect(w*0,h*0,w*0.2,w*0.07,w*0.03) 
       textSize(w*0.04)
@@ -390,7 +399,7 @@ function menu(){ // contains main menu items
 
 // credits button
     push();
-      translate(w*0,h*0.24);
+      translate(w*0,h*0.19);
       fill(235, 208, 214);
       rect(w*0,h*0,w*0.2,w*0.07,w*0.03) 
       textSize(w*0.04)
@@ -400,12 +409,13 @@ function menu(){ // contains main menu items
 
 // tip text
     push();
-      translate(w*0,h*0.43);
+      translate(w*0,h*0.38);
       textSize(w*0.02)
       fill(235, 208, 214);
       text('Tip:', w*0,-h*0.05,w*1) 
       text('Use the Note Pad\'s corner to progress days', w*0,h*0,w*1)
-      text('Use the \" ` \" key to open pause menu', w*0,h*0.03,w*1) 
+      text('Use the [ ` ] key to open pause menu', w*0,h*0.03,w*1) 
+      text('Use CONTROL + SHIFT + P  to create screengrab', w*0,h*0.06,w*1) 
     pop();
   pop();
 }
@@ -497,6 +507,8 @@ function diary() { // Display Diary Asset
 /*                               META FUNCTIONS                               */
 /* -------------------------------------------------------------------------- */
 
+/* -------------------------- quit and save & quit -------------------------- */
+
 function quit() { // quits game without saving
   gameState = 0;
   day = 1;
@@ -519,6 +531,8 @@ function saveQuit() { // saves progress, returns to menu
 
   introOpacity = 255;
 }
+
+/* ------------------------------- pause menu ------------------------------- */
 
 function pauseMenu() { // displays pause menu
   push()
@@ -589,9 +603,30 @@ function menuButton(x,y,w,h) { // used to detect if the cursor is in the specifi
   return mouseX > x-((w)/2) && mouseX < x+((w)/2) && mouseY < y+((h)/2) && mouseY > y-((h)/2)
 }
 
+/* --------------------------------- cursor --------------------------------- */
+
 function pointCursor() { // contains cursor used in point n' click area
   push()
   noStroke();
   ellipse(mX,mY,w*0.01,w*0.01);
   pop()
 }
+
+/* ------------------------ screenshot functionality ------------------------ */
+
+function screenGrab() { // saves current state of canvas
+
+  if(keyIsDown(SHIFT) === true && keyIsDown(CONTROL) === true && keyIsDown(80) === true){
+    if(prepSS){
+      saveCanvas('dear_mr-raccoon','png')
+    }
+    prepSS = false;
+  }
+}
+
+function keyReleased() {
+  if(keyCode === 80 || keyCode === SHIFT || keyCode === CONTROL){
+    prepSS = true;
+  }
+}
+
